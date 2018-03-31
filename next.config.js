@@ -1,14 +1,11 @@
-// This file is not going through babel transformation.
-// So, we write it in vanilla JS
-// (But you could use ES2015 features supported by your Node.js version)
-
+const path = require('path')
 const debug = process.env.NODE_ENV !== "production";
 
 module.exports = {
   exportPathMap: function () {
     return {
-      "/": { page: "/" },
-      "/about": { page: "/about" },
+      "/": { page: "/", query: { title: 'Home' } },
+      "/about": { page: "/about", query: { title: 'About' } },
     }
   },
   //assetPrefix: '',
@@ -23,6 +20,28 @@ module.exports = {
       }
       return rule
     })
+
+    config.module.rules.push(
+      {
+        test: /\.css$/,
+        use: [
+          {
+            loader: 'emit-file-loader',
+            options: {
+              name: 'dist/[path][name].[ext].js',
+            },
+          },
+          {
+            loader: 'babel-loader',
+            options: {
+              babelrc: false,
+              extends: path.resolve(__dirname, './.babelrc'),
+            },
+          },
+          'styled-jsx-css-loader',
+        ],
+      }
+    );
     // Important: return the modified config
     return config
   }/*,
